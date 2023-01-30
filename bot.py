@@ -1,19 +1,29 @@
 import os
-from telegram import Update, ReplyKeyboardMarkup
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import (
     Updater,
-    CommandHandler,
     CallbackContext,
-    MessageHandler,
-    filters
+    CommandHandler,
+    CallbackQueryHandler
 )
 
 TOKEN = os.environ['TOKEN']
 
 
 def start(update: Update, context: CallbackContext):
-    update.message.reply_html(text="<b>Assalomu alaylum!</b>\n\n<i>like botga xush kelibsiz!!</i>", \
-        reply_markup=ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True))
+    inline_keyboard = [ 
+        [
+            InlineKeyboardButton(text='👍', callback_data='like'), 
+            InlineKeyboardButton(text='👎', callback_data='dislike')
+        ]
+    ]
+    update.message.reply_html(
+            text="<b>Assalomu alaylum!</b>\n\n<i>like botga xush kelibsiz!!</i>", 
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
+        )
+
+def callback_btn(update: Update, context: CallbackContext):
+    print(update.callback_query.data)
 
 
 def main():
@@ -21,6 +31,8 @@ def main():
     dp = updater.dispatcher
 
     dp.add_handler(handler=CommandHandler(command='start', callback=start))
+
+    dp.add_handler(handler=CallbackQueryHandler(callback=callback_btn))
 
 
     updater.start_polling()
