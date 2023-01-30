@@ -9,12 +9,19 @@ from telegram.ext import (
 
 TOKEN = os.environ['TOKEN']
 
+like = 0
+dislike = 0
+
+
 
 def start(update: Update, context: CallbackContext):
     inline_keyboard = [ 
         [
             InlineKeyboardButton(text='👍', callback_data='like'), 
             InlineKeyboardButton(text='👎', callback_data='dislike')
+        ],
+        [
+            InlineKeyboardButton(text='x', callback_data='close')
         ]
     ]
     update.message.reply_html(
@@ -23,7 +30,30 @@ def start(update: Update, context: CallbackContext):
         )
 
 def callback_btn(update: Update, context: CallbackContext):
-    print(update.callback_query.data)
+    data = update.callback_query.data 
+    global like, dislike
+    if data == 'like':
+        like += 1
+    elif data == 'dislike':
+        dislike += 1
+    elif data == 'close':
+        update.callback_query.delete_message()
+        like = 0
+        dislike = 0
+        return 
+
+    inline_keyboard = [ 
+        [
+            InlineKeyboardButton(text=f'👍: {like}', callback_data='like'), 
+            InlineKeyboardButton(text=f'👎: {dislike}', callback_data='dislike')
+        ],
+        [
+            InlineKeyboardButton(text='x', callback_data='close')
+        ]
+    ]
+    update.callback_query.edit_message_reply_markup(
+                            reply_markup=InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
+                        )
 
 
 def main():
